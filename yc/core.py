@@ -19,7 +19,14 @@ class News(object):
         params = thriftdb.convert(params)
         data = req.get(self.url, params=params)
         self.request = data
-        return json.loads(data.content)
+        results = json.loads(data.content)
+        url = "http://news.ycombinator.com/item?id={0}"
+        for result in results['results']:
+            result['item']['hn_url'] = url.format(result['item']['id'])
+            if result['item'].get('discussion', None) is not None:
+                result['item']['discussion']['hn_url'] = url.format(
+                    result['item']['discussion']['id'])
+        return results
 
     def date(self, day):
         """Query a specific date."""
